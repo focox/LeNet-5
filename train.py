@@ -7,11 +7,11 @@ MODEL_SAVE_PATH = './model/'
 MODEL_NAME = 'model.ckpt'
 
 BATCH_SIZE = 100
-TRAINING_STEPS = 500001
+TRAINING_STEPS = 30001
 
 REGULARIZER_RATE = 0.0001
 
-LEARNING_RATE_BASE = 0.8
+LEARNING_RATE_BASE = 0.1
 LEARNING_RATE_DECAY = 0.99
 
 MOVING_AVERAGE_DECAY = 0.99
@@ -35,7 +35,10 @@ def train(mnist, train=True):
     learning_rate = tf.train.exponential_decay(LEARNING_RATE_BASE, global_step, mnist.train.num_examples/BATCH_SIZE, LEARNING_RATE_DECAY)
     train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(losses, global_step=global_step)
 
-    train_op = tf.group(train_step, average_variables_op)
+    # train_op = tf.group(train_step, average_variables_op)
+
+    with tf.control_dependencies([train_step, average_variables_op]):
+        train_op = tf.no_op('train')
 
     saver = tf.train.Saver()
     with tf.Session() as sess:
